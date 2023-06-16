@@ -8,6 +8,7 @@ import numpy as np
 import algorithms
 from maze_generator import MazeGenerator
 import time
+import math
 
 
 
@@ -15,7 +16,7 @@ class PathfindingVisualizer(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Pathfinding Visualizer")
-        self.setMinimumSize(900, 600)
+        self.setMinimumSize(900, 635)
         self.resize(1200, 800)
 
         self.rows = 41
@@ -39,7 +40,7 @@ class PathfindingVisualizer(QMainWindow):
 
 
     def __menu_layout(self):
-        menu_layout = QVBoxLayout()
+        self.menu_layout = QVBoxLayout()
         self.start_button = QPushButton('Start')
         self.node_types = QComboBox()
         self.node_types.addItems(['Start point', 'End point', 'Wall'])
@@ -53,22 +54,19 @@ class PathfindingVisualizer(QMainWindow):
         self.clear_vis_button.clicked.connect(self.__clear_visualization)
         self.clear_board_button.clicked.connect(self.__clear_board)
 
-        menu_layout.addWidget(self.start_button)
-        menu_layout.addWidget(self.node_types)
-        menu_layout.addWidget(self.clear_vis_button)
-        menu_layout.addWidget(self.clear_board_button)
-        menu_layout.addWidget(self.maze_button)
+        self.menu_layout.addWidget(self.start_button)
+        self.menu_layout.addWidget(self.node_types)
+        self.menu_layout.addWidget(self.clear_vis_button)
+        self.menu_layout.addWidget(self.clear_board_button)
+        self.menu_layout.addWidget(self.maze_button)
 
-        return menu_layout
+        return self.menu_layout
     
 
     def __generate_maze(self):
         self.__clear_board()
         self.board, history = self.maze_generator.generate()
-        
-        
         self.__maze_generation_visualization(history)
-        #self.__reload_graphic_view()
 
     
     def __maze_generation_visualization(self, history):
@@ -154,15 +152,6 @@ class PathfindingVisualizer(QMainWindow):
         self.__reload_graphic_view()
 
 
-    def __reload_graphic_view(self, include_visualization=False):
-        self.graphics_scene.clear()
-        gwidth, gheight = self.__calculate_graphics_view_size()
-        self.graphics_view.setFixedSize(gwidth, gheight)
-
-        self.__draw_grid()
-        self.__add_existing_nodes(include_visualization)
-
-
     def __draw_grid(self):
         gwidth, gheight = self.__calculate_graphics_view_size()
         step = self.__calculate_row_col_step()
@@ -173,7 +162,30 @@ class PathfindingVisualizer(QMainWindow):
         for y in range(0, gheight, step[1]):
             self.graphics_scene.addLine(0, y, gwidth, y, QPen(Qt.black))
 
+
+    def __reload_graphic_view(self, include_visualization=False):
+        gwidth, gheight = self.__calculate_graphics_view_size()
+        if gwidth + 100 >= self.size().width():
+            return
+        print(gwidth)
+        self.graphics_scene.clear()
+        self.graphics_view.setFixedSize(gwidth, gheight)
+
+        self.__draw_grid()
+        self.__add_existing_nodes(include_visualization)
+
+#TODO Choosing height/width to calculate new graphics view size
+    def __calculate_graphics_view_size(self):
+        cell_size = int(math.floor(self.height() / self.rows))
+        new_width = cell_size * self.cols
+        new_height = cell_size * self.rows
+        
+        if new_width + 100 >= self.size().width():
+            return self.graphics_view.size().width(), self.graphics_view.size().height()
+
+        return new_width, new_height
     
+
     def __add_existing_nodes(self, include_visualization):
         colors = {0: Qt.white, 1: Qt.black, 2: Qt.green, 3: Qt.red, 4: Qt.cyan, 5: Qt.yellow}
         step = self.__calculate_row_col_step()
@@ -192,20 +204,12 @@ class PathfindingVisualizer(QMainWindow):
                     self.graphics_scene.addRect(QRectF(i * step[0], j * step[1], step[0], step[1]), QPen(Qt.black), brush)
 
 
-    def __calculate_graphics_view_size(self):
-        return (int(round(self.height() / self.rows, 0)) * self.cols, int(self.height() / self.rows) * self.rows)
-
-
     def __calculate_row_col_step(self):
         gwidth, gheight = self.__calculate_graphics_view_size()
         w_step = round(gwidth / self.cols, 0)
         h_step = round(gheight / self.rows, 0)
 
         return (int(w_step), int(h_step))
-
-    
-    def resizeEvent(self, event):
-        self.__reload_graphic_view(include_visualization=True)
 
 
     def __update_board_matrix(self, x, y, color):
@@ -277,6 +281,10 @@ class PathfindingVisualizer(QMainWindow):
                     self.graphics_scene.addRect(QRectF(x, y, step[0], step[1]), border, brush)
 
         return QWidget.eventFilter(self, watched, event)
+    
+
+    def resizeEvent(self, event):
+        self.__reload_graphic_view(include_visualization=True)
 
 
 if __name__ == '__main__':
