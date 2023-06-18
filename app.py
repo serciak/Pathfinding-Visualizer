@@ -1,9 +1,8 @@
 import PySide6.QtGui
-from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QHBoxLayout, QGridLayout, QVBoxLayout, QLabel,
-                               QLineEdit, QPushButton, QFileDialog, QAbstractItemView, QListWidget,
-                               QMessageBox, QGraphicsView, QGraphicsScene, QComboBox, QSpacerItem)
-from PySide6.QtCore import Qt, QEvent, QRectF, QTimer, QSize
-from PySide6.QtGui import QPen, QBrush, QIcon, QColor
+from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QHBoxLayout, QVBoxLayout, QLabel,
+                               QLineEdit, QPushButton, QFileDialog, QMessageBox, QGraphicsView, QGraphicsScene, QComboBox)
+from PySide6.QtCore import Qt, QEvent, QRectF, QSize
+from PySide6.QtGui import QPen, QBrush, QIcon, QColor, QPixmap
 import numpy as np
 import algorithms
 from maze_generator import MazeGenerator
@@ -118,7 +117,7 @@ class PathfindingVisualizer(QMainWindow):
         try:
             visited, path = algorithms.dijkstra_shortest_path(self.board, self.start_point, self.end_point)
         except Exception as e:
-            QMessageBox.information(self, 'Visualization error', str(e))
+            self.__display_warning('Visualization error', str(e))
             return
 
         border = QPen(self.colors['Wall'])
@@ -197,8 +196,6 @@ class PathfindingVisualizer(QMainWindow):
         gwidth, gheight = self.__calculate_graphics_view_size()
         self.graphics_scene.clear()
         self.graphics_view.setFixedSize(gwidth, gheight)
-        print('GV: ', self.graphics_view.width(), self.graphics_view.height())
-        print('Window: ', self.width(), self.height())
 
         self.__draw_grid()
         self.__add_existing_nodes(include_visualization)
@@ -319,6 +316,18 @@ class PathfindingVisualizer(QMainWindow):
     def resizeEvent(self, event):
         self.__reload_graphic_view(include_visualization=True)
         self.__set_new_minimum_width()
+
+
+    def __display_warning(self, title, text):
+        warn_box = QMessageBox(self)
+        warn_box.setIconPixmap(QPixmap('./icons/warning_icon.png'))
+        warn_box.setWindowIcon(QIcon('./icons/warning_icon.png'))
+        warn_box.setWindowTitle(title)
+        warn_box.setText(text)
+        warn_box.setStandardButtons(QMessageBox.StandardButton.Ok)
+
+        warn_box.exec()
+
 
 
 if __name__ == '__main__':

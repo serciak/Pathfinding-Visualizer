@@ -31,16 +31,6 @@ class MazeGenerator:
     def divide(self, x, y, cols, rows):
         random_generator = random.Random()
 
-        orientation = 0
-        new_wall = 0
-        new_hole = 0
-        new_rows = 0
-        new_cols = 0
-        y_pair = 0
-        x_pair = 0
-        new_rows_pair = 0
-        new_cols_pair = 0
-
         if cols < rows:
             orientation = 0
         elif cols > rows:
