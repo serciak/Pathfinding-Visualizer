@@ -1,9 +1,9 @@
 import PySide6.QtGui
 from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QHBoxLayout, QGridLayout, QVBoxLayout, QLabel,
                                QLineEdit, QPushButton, QFileDialog, QAbstractItemView, QListWidget,
-                               QMessageBox, QGraphicsView, QGraphicsScene, QComboBox)
-from PySide6.QtCore import Qt, QEvent, QRectF, QTimer
-from PySide6.QtGui import QPen, QBrush
+                               QMessageBox, QGraphicsView, QGraphicsScene, QComboBox, QSpacerItem)
+from PySide6.QtCore import Qt, QEvent, QRectF, QTimer, QSize
+from PySide6.QtGui import QPen, QBrush, QIcon
 import numpy as np
 import algorithms
 from maze_generator import MazeGenerator
@@ -16,8 +16,9 @@ class PathfindingVisualizer(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Pathfinding Visualizer")
-        self.setMinimumSize(900, 635)
+        self.setMinimumSize(930, 635)
         self.resize(1200, 800)
+        self.setWindowIcon(QIcon('./icons/path_icon.png'))
 
         self.rows = 41
         self.cols = 51
@@ -32,35 +33,58 @@ class PathfindingVisualizer(QMainWindow):
         central_layout = QHBoxLayout()
         
         self.__init_graphics_view()
+        central_layout.addWidget(self.__menu_widget())
         central_layout.addWidget(self.graphics_view)
-        central_layout.addLayout(self.__menu_layout())
 
         self.central_widget.setLayout(central_layout)
         self.setCentralWidget(self.central_widget)
 
 
-    def __menu_layout(self):
+    def __menu_widget(self):
+        self.menu_widget = QWidget()
         self.menu_layout = QVBoxLayout()
-        self.start_button = QPushButton('Start')
+
+        self.start_button = QPushButton(icon=QIcon('./icons/start_icon.png'))
+        self.start_button.setMinimumSize(120, 50)
+        self.start_button.setIconSize(QSize(30, 30))
+
         self.node_types = QComboBox()
+        self.node_types.setMinimumSize(120, 50)
         self.node_types.addItems(['Start point', 'End point', 'Wall'])
-        self.clear_board_button = QPushButton('Clear board')
-        self.clear_vis_button = QPushButton('Clear visualization')
-        self.clear_board_button = QPushButton('Clear board')
-        self.maze_button = QPushButton('Generate maze')
+
+        self.node_types.setItemIcon(0, QIcon('./icons/start_point_icon.png'))
+        self.node_types.setItemIcon(1, QIcon('./icons/finish_icon.png'))
+        self.node_types.setItemIcon(2, QIcon('./icons/wall_icon.png'))
+        self.node_types.setIconSize(QSize(20,20))
+
+
+        self.clear_board_button = QPushButton(icon=QIcon('./icons/bin_icon.png'), text='Clear board')
+        self.clear_board_button.setMinimumSize(120, 50)
+        self.clear_board_button.setIconSize(QSize(30, 30))
+
+        self.clear_vis_button = QPushButton(icon=QIcon('./icons/broom_icon.png'), text='Clear\nvisualization')
+        self.clear_vis_button.setMinimumSize(120, 50)
+        self.clear_vis_button.setIconSize(QSize(30, 30))
+
+        self.maze_button = QPushButton(icon=QIcon('./icons/maze_icon.png'))
+        self.maze_button.setMinimumSize(120, 50)
+        self.maze_button.setIconSize(QSize(30, 30))
 
         self.start_button.clicked.connect(self.__visualize)
         self.maze_button.clicked.connect(self.__generate_maze)
         self.clear_vis_button.clicked.connect(self.__clear_visualization)
         self.clear_board_button.clicked.connect(self.__clear_board)
 
-        self.menu_layout.addWidget(self.start_button)
-        self.menu_layout.addWidget(self.node_types)
-        self.menu_layout.addWidget(self.clear_vis_button)
-        self.menu_layout.addWidget(self.clear_board_button)
-        self.menu_layout.addWidget(self.maze_button)
+        self.menu_layout.addWidget(self.start_button, alignment=Qt.AlignHCenter)
+        self.menu_layout.addWidget(self.node_types, alignment=Qt.AlignHCenter)
+        self.menu_layout.addWidget(self.clear_board_button, alignment=Qt.AlignHCenter)
+        self.menu_layout.addWidget(self.clear_vis_button, alignment=Qt.AlignHCenter)
+        self.menu_layout.addWidget(self.maze_button, alignment=Qt.AlignHCenter)
 
-        return self.menu_layout
+        self.menu_widget.setLayout(self.menu_layout)
+        self.menu_widget.setMaximumWidth(250)
+
+        return self.menu_widget
     
 
     def __generate_maze(self):
@@ -140,6 +164,7 @@ class PathfindingVisualizer(QMainWindow):
 
         self.graphics_view.setScene(self.graphics_scene)
         self.graphics_view.viewport().installEventFilter(self)
+        self.graphics_view.setAlignment(Qt.AlignCenter)
 
     
     def __clear_board(self):
@@ -165,23 +190,22 @@ class PathfindingVisualizer(QMainWindow):
 
     def __reload_graphic_view(self, include_visualization=False):
         gwidth, gheight = self.__calculate_graphics_view_size()
-        if gwidth + 100 >= self.size().width():
-            return
-        print(gwidth)
         self.graphics_scene.clear()
         self.graphics_view.setFixedSize(gwidth, gheight)
+        print('GV: ', self.graphics_view.width(), self.graphics_view.height())
+        print('Window: ', self.width(), self.height())
 
         self.__draw_grid()
         self.__add_existing_nodes(include_visualization)
 
-#TODO Choosing height/width to calculate new graphics view size
+#TODO
     def __calculate_graphics_view_size(self):
+        #size_param = self.height() if self.graphics_view.height() < self.width() - 200 else self.width() - 200
+        #ratio_param = self.rows if self.graphics_view.height() < self.width() - 200 else self.cols
+
         cell_size = int(math.floor(self.height() / self.rows))
         new_width = cell_size * self.cols
         new_height = cell_size * self.rows
-        
-        if new_width + 100 >= self.size().width():
-            return self.graphics_view.size().width(), self.graphics_view.size().height()
 
         return new_width, new_height
     
