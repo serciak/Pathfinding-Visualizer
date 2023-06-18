@@ -229,7 +229,6 @@ class PathfindingVisualizer(QMainWindow):
                 if node != 0:
                     node_type = node_types[node]
                     brush.setColor(self.colors[node_type])
-                    print(node_type)
                     self.graphics_scene.addRect(QRectF(i * step[0], j * step[1], step[0], step[1]), QPen(Qt.black), brush)
 
 
@@ -311,8 +310,15 @@ class PathfindingVisualizer(QMainWindow):
         return QWidget.eventFilter(self, watched, event)
     
 
+    def __set_new_minimum_width(self):
+        ratio = self.cols / self.rows
+        new_min_width = int(round(self.height() * ratio, 0))
+        self.setMinimumWidth(new_min_width + 135)
+
+
     def resizeEvent(self, event):
         self.__reload_graphic_view(include_visualization=True)
+        self.__set_new_minimum_width()
 
 
 if __name__ == '__main__':
