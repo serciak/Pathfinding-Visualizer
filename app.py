@@ -3,7 +3,7 @@ from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QHBoxLayout, 
                                QLineEdit, QPushButton, QFileDialog, QAbstractItemView, QListWidget,
                                QMessageBox, QGraphicsView, QGraphicsScene, QComboBox, QSpacerItem)
 from PySide6.QtCore import Qt, QEvent, QRectF, QTimer, QSize
-from PySide6.QtGui import QPen, QBrush, QIcon
+from PySide6.QtGui import QPen, QBrush, QIcon, QColor
 import numpy as np
 import algorithms
 from maze_generator import MazeGenerator
@@ -26,6 +26,12 @@ class PathfindingVisualizer(QMainWindow):
         self.visualization_nodes = np.zeros((self.cols, self.rows))
         self.start_point = None
         self.end_point = None
+        self.colors = {'Start point': QColor(52, 168, 83, 255), 
+                       'End point': QColor(234, 67, 53, 255), 
+                       'Wall': QColor(5, 5, 5, 255),
+                       'Visualization': QColor(66, 133, 244, 255),
+                       'Path': QColor(251, 188, 5, 255),
+                       'Empty': Qt.white}
 
         self.maze_generator = MazeGenerator(self.board.shape)
 
@@ -34,7 +40,7 @@ class PathfindingVisualizer(QMainWindow):
         
         self.__init_graphics_view()
         central_layout.addWidget(self.__menu_widget())
-        central_layout.addWidget(self.graphics_view)
+        central_layout.addWidget(self.graphics_view, alignment=Qt.AlignCenter)
 
         self.central_widget.setLayout(central_layout)
         self.setCentralWidget(self.central_widget)
@@ -75,11 +81,11 @@ class PathfindingVisualizer(QMainWindow):
         self.clear_vis_button.clicked.connect(self.__clear_visualization)
         self.clear_board_button.clicked.connect(self.__clear_board)
 
-        self.menu_layout.addWidget(self.start_button, alignment=Qt.AlignHCenter)
-        self.menu_layout.addWidget(self.node_types, alignment=Qt.AlignHCenter)
-        self.menu_layout.addWidget(self.clear_board_button, alignment=Qt.AlignHCenter)
-        self.menu_layout.addWidget(self.clear_vis_button, alignment=Qt.AlignHCenter)
-        self.menu_layout.addWidget(self.maze_button, alignment=Qt.AlignHCenter)
+        self.menu_layout.addWidget(self.start_button)
+        self.menu_layout.addWidget(self.node_types)
+        self.menu_layout.addWidget(self.clear_board_button)
+        self.menu_layout.addWidget(self.clear_vis_button)
+        self.menu_layout.addWidget(self.maze_button)
 
         self.menu_widget.setLayout(self.menu_layout)
         self.menu_widget.setMaximumWidth(250)
@@ -99,7 +105,7 @@ class PathfindingVisualizer(QMainWindow):
         border = QPen(Qt.black)
         for node in history:
             x, y = node
-            color = Qt.white if self.board[x, y] == 0 else Qt.black
+            color = self.colors['Empty'] if self.board[x, y] == 0 else self.colors['Wall']
             self.__draw_visualization_node(x, y, color, border, brush)
             QApplication.processEvents()
             time.sleep(0)
@@ -115,7 +121,7 @@ class PathfindingVisualizer(QMainWindow):
             QMessageBox.information(self, 'Visualization error', str(e))
             return
 
-        border = QPen(Qt.black)
+        border = QPen(self.colors['Wall'])
 
         brush = QBrush()
         brush.setStyle(Qt.SolidPattern)
@@ -124,7 +130,7 @@ class PathfindingVisualizer(QMainWindow):
             x, y = node
             if (x, y) not in [self.start_point, self.end_point]:
                 self.visualization_nodes[x, y] = 4
-                self.__draw_visualization_node(x, y, Qt.cyan, border, brush)
+                self.__draw_visualization_node(x, y, self.colors['Visualization'], border, brush)
                 QApplication.processEvents()
                 time.sleep(0)
 
@@ -132,7 +138,7 @@ class PathfindingVisualizer(QMainWindow):
             x, y = np.unravel_index(node, self.board.shape)
             if (x, y) not in [self.start_point, self.end_point]:
                 self.visualization_nodes[x, y] = 5
-                self.__draw_visualization_node(x, y, Qt.yellow, border, brush)
+                self.__draw_visualization_node(x, y, self.colors['Path'], border, brush)
                 QApplication.processEvents()
                 time.sleep(0.01)
 
@@ -164,7 +170,6 @@ class PathfindingVisualizer(QMainWindow):
 
         self.graphics_view.setScene(self.graphics_scene)
         self.graphics_view.viewport().installEventFilter(self)
-        self.graphics_view.setAlignment(Qt.AlignCenter)
 
     
     def __clear_board(self):
@@ -198,11 +203,8 @@ class PathfindingVisualizer(QMainWindow):
         self.__draw_grid()
         self.__add_existing_nodes(include_visualization)
 
-#TODO
-    def __calculate_graphics_view_size(self):
-        #size_param = self.height() if self.graphics_view.height() < self.width() - 200 else self.width() - 200
-        #ratio_param = self.rows if self.graphics_view.height() < self.width() - 200 else self.cols
 
+    def __calculate_graphics_view_size(self):
         cell_size = int(math.floor(self.height() / self.rows))
         new_width = cell_size * self.cols
         new_height = cell_size * self.rows
@@ -211,7 +213,7 @@ class PathfindingVisualizer(QMainWindow):
     
 
     def __add_existing_nodes(self, include_visualization):
-        colors = {0: Qt.white, 1: Qt.black, 2: Qt.green, 3: Qt.red, 4: Qt.cyan, 5: Qt.yellow}
+        node_types = {0: 'Empty', 1: 'Wall', 2: 'Start point', 3: 'End point', 4: 'Visualization', 5: 'Path'}
         step = self.__calculate_row_col_step()
 
         brush = QBrush()
@@ -220,11 +222,14 @@ class PathfindingVisualizer(QMainWindow):
         for i, row in enumerate(self.board):
             for j, node in enumerate(row):
                 if include_visualization:
-                    brush.setColor(colors[self.visualization_nodes[i, j]])
+                    node_type = node_types[self.visualization_nodes[i, j]]
+                    brush.setColor(self.colors[node_type])
                     self.graphics_scene.addRect(QRectF(i * step[0], j * step[1], step[0], step[1]), QPen(Qt.black), brush)
 
                 if node != 0:
-                    brush.setColor(colors[node])
+                    node_type = node_types[node]
+                    brush.setColor(self.colors[node_type])
+                    print(node_type)
                     self.graphics_scene.addRect(QRectF(i * step[0], j * step[1], step[0], step[1]), QPen(Qt.black), brush)
 
 
@@ -244,7 +249,7 @@ class PathfindingVisualizer(QMainWindow):
         if x >= self.cols or y >= self.rows:
             return False
 
-        if color == Qt.white:
+        if color == self.colors['Empty']:
             self.board[x, y] = 0
             if (x, y) == self.start_point:
                 self.start_point = None
@@ -252,14 +257,14 @@ class PathfindingVisualizer(QMainWindow):
                 self.end_point = None
             return True
         elif self.board[x, y] == 0:
-            if color == Qt.black:
+            if color == self.colors['Wall']:
                 self.board[x, y] = 1
                 return True
-            if color == Qt.green and not self.start_point:
+            if color == self.colors['Start point'] and not self.start_point:
                 self.board[x, y] = 2
                 self.start_point = (x, y)
                 return True
-            if color == Qt.red and not self.end_point:
+            if color == self.colors['End point'] and not self.end_point:
                 self.board[x, y] = 3
                 self.end_point = (x, y)
                 return True
@@ -268,7 +273,6 @@ class PathfindingVisualizer(QMainWindow):
 
 
     def eventFilter(self, watched, event):
-        colors = {'Start point': Qt.green, 'End point': Qt.red, 'Wall': Qt.black}
         gwidth, gheight = self.__calculate_graphics_view_size()
         step = self.__calculate_row_col_step()
 
@@ -276,7 +280,7 @@ class PathfindingVisualizer(QMainWindow):
         brush.setStyle(Qt.SolidPattern)
 
         border = QPen(Qt.black)
-        color = colors[self.node_types.currentText()]
+        color = self.colors[self.node_types.currentText()]
 
         if event.type() == QEvent.MouseButtonPress and watched is self.graphics_view.viewport():
             pos = event.position()
@@ -287,18 +291,18 @@ class PathfindingVisualizer(QMainWindow):
                 brush.setColor(color)
                 self.graphics_scene.addRect(QRectF(x, y, step[0], step[1]), border, brush)
 
-            elif event.button() == Qt.RightButton and self.__update_board_matrix(x, y, Qt.white):
-                brush.setColor(Qt.white)
+            elif event.button() == Qt.RightButton and self.__update_board_matrix(x, y, self.colors['Empty']):
+                brush.setColor(self.colors['Empty'])
                 self.graphics_scene.addRect(QRectF(x, y, step[0], step[1]), border, brush)
 
             self.last = event.button()
 
-        if event.type() == QEvent.MouseMove and watched is self.graphics_view.viewport() and not (self.last == Qt.LeftButton and color in [Qt.green, Qt.red]):
+        if event.type() == QEvent.MouseMove and watched is self.graphics_view.viewport() and not (self.last == Qt.LeftButton and color in [self.colors['Start point'], self.colors['End point']]):
             pos = event.position()
             x = pos.x() - (pos.x() % step[0])
             y = pos.y() - (pos.y() % step[1])
             in_board = x <= gwidth or y <= gheight
-            brush.setColor(color) if self.last == Qt.LeftButton else brush.setColor(Qt.white)
+            brush.setColor(color) if self.last == Qt.LeftButton else brush.setColor(self.colors['Empty'])
 
             if in_board:
                 if self.__update_board_matrix(x, y, brush.color()):
