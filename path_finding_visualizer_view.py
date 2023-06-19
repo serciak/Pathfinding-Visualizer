@@ -12,15 +12,15 @@ import math
 
 
 class PathfindingVisualizer(QMainWindow):
-    def __init__(self):
+    def __init__(self, rows, cols):
         super().__init__()
         self.setWindowTitle("Pathfinding Visualizer")
         self.setMinimumSize(930, 635)
         self.resize(1200, 800)
         self.setWindowIcon(QIcon('./icons/path_icon.png'))
 
-        self.rows = 41
-        self.cols = 51
+        self.rows = rows
+        self.cols = cols
         self.board = np.zeros((self.cols, self.rows))
         self.visualization_nodes = np.zeros((self.cols, self.rows))
         self.start_point = None
@@ -332,7 +332,7 @@ class PathfindingVisualizer(QMainWindow):
 
 if __name__ == '__main__':
     app = QApplication()
-    view = PathfindingVisualizer()
+    view = PathfindingVisualizer(41, 51)
     view.show()
     app.exec()
 

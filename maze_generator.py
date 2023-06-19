@@ -13,7 +13,6 @@ class MazeGenerator:
         self.board = np.ones((self.rows, self.cols))
         self.board[1:-1,1:-1] = 0
 
-        print(self.cols, self.rows)
         top_border = [(i, 0) for i in range(self.rows)]
         right_border = [(self.rows-1, i) for i in range(self.cols)]
         bottom_border = [(i, self.cols-1) for i in range(self.rows)]
