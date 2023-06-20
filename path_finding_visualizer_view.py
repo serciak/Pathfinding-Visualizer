@@ -5,6 +5,7 @@ from PySide6.QtGui import QPen, QBrush, QIcon, QColor, QPixmap
 import numpy as np
 from pathfinding_algorithms import PathfindingAlgorithms
 from maze_generator import MazeGenerator
+from board_saving import BoardSaver
 import time
 import math
 
@@ -13,7 +14,7 @@ import math
 class PathfindingVisualizer(QMainWindow):
     go_back = Signal()
 
-    def __init__(self, rows, cols):
+    def __init__(self, rows, cols, size):
         super().__init__()
         self.setWindowTitle("Pathfinding Visualizer")
         self.setMinimumSize(930, 635)
@@ -36,6 +37,7 @@ class PathfindingVisualizer(QMainWindow):
 
         self.maze_generator = MazeGenerator(self.board.shape)
         self.pf_algorithms = PathfindingAlgorithms()
+        self.board_saver = BoardSaver(size)
 
         self.central_widget = QWidget()
         central_layout = QHBoxLayout()
@@ -358,6 +360,10 @@ class PathfindingVisualizer(QMainWindow):
         warn_box.setStandardButtons(QMessageBox.StandardButton.Ok)
 
         warn_box.exec()
+
+
+    def __display_board_saving_dialog(self):
+        pass
 
 
 

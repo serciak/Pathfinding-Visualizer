@@ -65,7 +65,7 @@ class MenuView(QMainWindow):
 
     def __open_path_finding_visualizer(self):
         board_sizes = {'Small': (23, 33), 'Medium': (41, 51), 'Large': (65, 79)}
-        self.pfv_view = PathfindingVisualizer(*board_sizes[self.board_options.currentText()])
+        self.pfv_view = PathfindingVisualizer(*board_sizes[self.board_options.currentText()], self.board_options.currentText())
         self.pfv_view.go_back.connect(self.show)
 
         self.pfv_view.show()
