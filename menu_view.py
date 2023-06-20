@@ -1,10 +1,7 @@
-import PySide6.QtGui
-from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QHBoxLayout, QVBoxLayout, QLabel,
-                               QLineEdit, QPushButton, QComboBox)
-from PySide6.QtCore import Qt, QEvent, QRectF, QSize
-from PySide6.QtGui import QPen, QBrush, QIcon, QColor, QPixmap
+from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QHBoxLayout, QVBoxLayout, QLabel, QPushButton, QComboBox)
+from PySide6.QtCore import Qt, QSize
+from PySide6.QtGui import QIcon, QPixmap, QFont
 from path_finding_visualizer_view import PathfindingVisualizer
-
 
 
 
@@ -25,20 +22,38 @@ class MenuView(QMainWindow):
 
 
     def __make_central_layout(self):
-        self.central_layout.addWidget(QLabel('PATHFINDING VISUALIZER'))
+        font = QFont()
+        font.setPointSize(18)
 
-        buttons_layout = QHBoxLayout()
-        start_button = QPushButton('START')
-        start_button.setMinimumSize(120, 50)
+        logo = QLabel()
+        logo.setPixmap(QPixmap('./icons/pfv_logo.png'))
+        self.central_layout.addWidget(logo, alignment=Qt.AlignCenter)
+
+        buttons_layout = QVBoxLayout()
+        start_button = QPushButton('Start')
+        start_button.setFont(font)
+        start_button.setFixedSize(250, 80)
         start_button.clicked.connect(self.__open_path_finding_visualizer)
 
         self.board_options = QComboBox()
-        self.board_options.setMinimumSize(120, 50)
+        self.board_options.setFont(font)
+        self.board_options.setFixedSize(250, 80)
         self.board_options.addItems(['Small', 'Medium', 'Large'])
+        self.board_options.setItemIcon(0, QIcon('./icons/small_icon.png'))
+        self.board_options.setItemIcon(1, QIcon('./icons/mid_icon.png'))
+        self.board_options.setItemIcon(2, QIcon('./icons/large_icon.png'))
+        self.board_options.setIconSize(QSize(30, 30))
         self.board_options.setCurrentIndex(1)
 
-        buttons_layout.addWidget(start_button)
-        buttons_layout.addWidget(self.board_options)
+        quit_button = QPushButton('Quit')
+        quit_button.setFont(font)
+        quit_button.setFixedSize(250, 80)
+        quit_button.clicked.connect(self.close)
+
+        buttons_layout.addWidget(start_button, alignment=Qt.AlignCenter)
+        buttons_layout.addWidget(self.board_options, alignment=Qt.AlignCenter)
+        buttons_layout.addWidget(quit_button, alignment=Qt.AlignCenter)
+
 
         self.central_layout.addLayout(buttons_layout)
 
@@ -46,9 +61,10 @@ class MenuView(QMainWindow):
     def __open_path_finding_visualizer(self):
         board_sizes = {'Small': (23, 33), 'Medium': (41, 51), 'Large': (65, 79)}
         self.pfv_view = PathfindingVisualizer(*board_sizes[self.board_options.currentText()])
-        
+        self.pfv_view.go_back.connect(self.show)
+
         self.pfv_view.show()
-        self.close()
+        self.hide()
         
 
 
@@ -58,4 +74,3 @@ if __name__ == '__main__':
     view = MenuView()
     view.show()
     app.exec()
-

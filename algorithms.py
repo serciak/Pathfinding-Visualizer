@@ -1,6 +1,5 @@
 import numpy as np
 import heapq
-import random
 
 
 
@@ -36,7 +35,7 @@ def dijkstra_shortest_path(board, start, end):
                 if board[neighbor_row, neighbor_col] == 1:
                     continue  # Skip walls
 
-                tentative_dist = curr_dist + 1  # Assuming all edges have a weight of 1
+                tentative_dist = curr_dist + 1
 
                 if tentative_dist < distance[neighbor_row, neighbor_col]:
                     distance[neighbor_row, neighbor_col] = tentative_dist
@@ -100,7 +99,7 @@ def astar_shortest_path(board, start, end):
                 if board[neighbor_row, neighbor_col] == 1:
                     continue  # Skip walls
 
-                tentative_dist = distance[curr_node] + 1  # Assuming all edges have a weight of 1
+                tentative_dist = distance[curr_node] + 1
 
                 if tentative_dist < distance[neighbor_row, neighbor_col]:
                     distance[neighbor_row, neighbor_col] = tentative_dist

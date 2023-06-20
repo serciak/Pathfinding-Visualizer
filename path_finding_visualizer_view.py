@@ -1,7 +1,7 @@
 import PySide6.QtGui
 from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QHBoxLayout, QVBoxLayout, QLabel,
                                QLineEdit, QPushButton, QFileDialog, QMessageBox, QGraphicsView, QGraphicsScene, QComboBox)
-from PySide6.QtCore import Qt, QEvent, QRectF, QSize
+from PySide6.QtCore import Qt, QEvent, QRectF, QSize, Signal
 from PySide6.QtGui import QPen, QBrush, QIcon, QColor, QPixmap
 import numpy as np
 import algorithms
@@ -12,6 +12,8 @@ import math
 
 
 class PathfindingVisualizer(QMainWindow):
+    go_back = Signal()
+
     def __init__(self, rows, cols):
         super().__init__()
         self.setWindowTitle("Pathfinding Visualizer")
@@ -79,10 +81,15 @@ class PathfindingVisualizer(QMainWindow):
         self.maze_button.setMinimumSize(120, 50)
         self.maze_button.setIconSize(QSize(30, 30))
 
+        self.back_button = QPushButton(icon=QIcon('./icons/back_icon.png'))
+        self.back_button.setMinimumSize(120, 50)
+        self.back_button.setIconSize(QSize(30, 30))
+
         self.start_button.clicked.connect(self.__visualize)
         self.maze_button.clicked.connect(self.__generate_maze)
         self.clear_vis_button.clicked.connect(self.__clear_visualization)
         self.clear_board_button.clicked.connect(self.__clear_board)
+        self.back_button.clicked.connect(self.__on_back_button)
 
         self.menu_layout.addWidget(self.algorithms_list)
         self.menu_layout.addWidget(self.start_button)
@@ -90,12 +97,18 @@ class PathfindingVisualizer(QMainWindow):
         self.menu_layout.addWidget(self.clear_board_button)
         self.menu_layout.addWidget(self.clear_vis_button)
         self.menu_layout.addWidget(self.maze_button)
+        self.menu_layout.addWidget(self.back_button)
 
         self.menu_widget.setLayout(self.menu_layout)
         self.menu_widget.setMaximumWidth(250)
 
         return self.menu_widget
     
+
+    def __on_back_button(self):
+        self.close()
+        self.go_back.emit()
+
 
     def __generate_maze(self):
         self.__clear_board()
@@ -170,7 +183,9 @@ class PathfindingVisualizer(QMainWindow):
         self.graphics_view.setFixedSize(gwidth, gheight)
 
         self.graphics_view.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.graphics_view.horizontalScrollBar().blockSignals(True)
         self.graphics_view.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.graphics_view.verticalScrollBar().blockSignals(True)
 
         self.graphics_scene.setBackgroundBrush(Qt.white)
 
