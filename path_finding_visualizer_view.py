@@ -1,6 +1,5 @@
-import PySide6.QtGui
 from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QHBoxLayout, QVBoxLayout, QLabel,
-                               QLineEdit, QPushButton, QFileDialog, QMessageBox, QGraphicsView, QGraphicsScene, QComboBox)
+                               QLineEdit, QPushButton, QFileDialog, QMessageBox, QGraphicsView, QGraphicsScene, QComboBox, QStyleFactory)
 from PySide6.QtCore import Qt, QEvent, QRectF, QSize
 from PySide6.QtGui import QPen, QBrush, QIcon, QColor, QPixmap
 import numpy as np
@@ -343,6 +342,7 @@ if __name__ == '__main__':
     app = QApplication()
     view = PathfindingVisualizer(41, 51)
     view.show()
+    app.setStyle('Fusion')
     app.exec()
 
 
