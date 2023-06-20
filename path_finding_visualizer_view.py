@@ -1,4 +1,3 @@
-import PySide6.QtGui
 from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QHBoxLayout, QVBoxLayout, QLabel,
                                QLineEdit, QPushButton, QFileDialog, QMessageBox, QGraphicsView, QGraphicsScene, QComboBox)
 from PySide6.QtCore import Qt, QEvent, QRectF, QSize, Signal
@@ -358,6 +357,7 @@ if __name__ == '__main__':
     app = QApplication()
     view = PathfindingVisualizer(41, 51)
     view.show()
+    app.setStyle('Fusion')
     app.exec()
 
 
