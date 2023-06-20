@@ -53,6 +53,10 @@ class PathfindingVisualizer(QMainWindow):
         self.start_button.setMinimumSize(120, 50)
         self.start_button.setIconSize(QSize(30, 30))
 
+        self.algorithms_list = QComboBox()
+        self.algorithms_list.setMinimumSize(120, 50)
+        self.algorithms_list.addItems(['Dijkstra\'s Algorithm', 'A* Search'])
+
         self.node_types = QComboBox()
         self.node_types.setMinimumSize(120, 50)
         self.node_types.addItems(['Start point', 'End point', 'Wall'])
@@ -80,6 +84,7 @@ class PathfindingVisualizer(QMainWindow):
         self.clear_vis_button.clicked.connect(self.__clear_visualization)
         self.clear_board_button.clicked.connect(self.__clear_board)
 
+        self.menu_layout.addWidget(self.algorithms_list)
         self.menu_layout.addWidget(self.start_button)
         self.menu_layout.addWidget(self.node_types)
         self.menu_layout.addWidget(self.clear_board_button)
@@ -111,11 +116,15 @@ class PathfindingVisualizer(QMainWindow):
     
 
     def __visualize(self):
+        self.algorithm_types = {'Dijkstra\'s Algorithm': algorithms.dijkstra_shortest_path, 
+                                'A* Search': algorithms.astar_shortest_path}
+
         self.visualization_nodes = np.zeros((self.cols, self.rows))
         self.__reload_graphic_view()
 
         try:
-            visited, path = algorithms.astar_shortest_path(self.board, self.start_point, self.end_point)
+            algorithm = self.algorithm_types[self.algorithms_list.currentText()]
+            visited, path = algorithm(self.board, self.start_point, self.end_point)
         except Exception as e:
             self.__display_warning('Visualization error', str(e))
             return

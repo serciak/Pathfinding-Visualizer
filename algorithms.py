@@ -5,10 +5,10 @@ import random
 
 
 def dijkstra_shortest_path(board, start, end):
-    rows, cols = board.shape
-
     if start is None or end is None:
         raise ValueError("Start or end point not found!")
+    
+    rows, cols = board.shape
 
     distance = np.inf * np.ones((rows, cols))
     distance[start] = 0
@@ -70,6 +70,8 @@ def heuristic(node, end):
     return abs(node[0] - end[0]) + abs(node[1] - end[1])
 
 def astar_shortest_path(board, start, end):
+    if start is None or end is None:
+        raise ValueError("Start or end point not found!")
     rows, cols = board.shape
 
     distance = np.inf * np.ones((rows, cols))
@@ -106,7 +108,7 @@ def astar_shortest_path(board, start, end):
                     heapq.heappush(priority_queue, (priority, neighbor))
 
     if distance[end] == np.inf:
-        return None  # No path found
+        raise RuntimeError('No path found!')
 
     # Reconstruct the shortest path
     path = []
@@ -118,7 +120,7 @@ def astar_shortest_path(board, start, end):
         for neighbor in neighbors:
             neighbor_row, neighbor_col = neighbor
             if 0 <= neighbor_row < rows and 0 <= neighbor_col < cols:
-                if distance[neighbor_row, neighbor_col] == distance[current] - 1:
+                if distance[neighbor_row, neighbor_col] == distance[current] - 1 and neighbor in visited:
                     current = neighbor
                     break
 
