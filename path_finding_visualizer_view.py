@@ -1,9 +1,9 @@
 from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QHBoxLayout, QVBoxLayout, QLabel,
-                               QLineEdit, QPushButton, QFileDialog, QMessageBox, QGraphicsView, QGraphicsScene, QComboBox)
+                               QLineEdit, QPushButton, QMessageBox, QGraphicsView, QGraphicsScene, QComboBox)
 from PySide6.QtCore import Qt, QEvent, QRectF, QSize, Signal
 from PySide6.QtGui import QPen, QBrush, QIcon, QColor, QPixmap
 import numpy as np
-import algorithms
+from pathfinding_algorithms import PathfindingAlgorithms
 from maze_generator import MazeGenerator
 import time
 import math
@@ -32,8 +32,10 @@ class PathfindingVisualizer(QMainWindow):
                        'Visualization': QColor(66, 133, 244, 255),
                        'Path': QColor(251, 188, 5, 255),
                        'Empty': Qt.white}
+        self.speed_levels = {'Extreme fast': 0, 'Fast': 0.01, 'Average': 0.025, 'Slow': 0.075}
 
         self.maze_generator = MazeGenerator(self.board.shape)
+        self.pf_algorithms = PathfindingAlgorithms()
 
         self.central_widget = QWidget()
         central_layout = QHBoxLayout()
@@ -57,6 +59,11 @@ class PathfindingVisualizer(QMainWindow):
         self.algorithms_list = QComboBox()
         self.algorithms_list.setMinimumSize(120, 50)
         self.algorithms_list.addItems(['Dijkstra\'s Algorithm', 'A* Search'])
+
+        self.speed = QComboBox()
+        self.speed.setMinimumSize(120, 50)
+        self.speed.addItems(self.speed_levels.keys())
+        self.speed.setCurrentIndex(0)
 
         self.node_types = QComboBox()
         self.node_types.setMinimumSize(120, 50)
@@ -92,6 +99,7 @@ class PathfindingVisualizer(QMainWindow):
 
         self.menu_layout.addWidget(self.algorithms_list)
         self.menu_layout.addWidget(self.start_button)
+        self.menu_layout.addWidget(self.speed)
         self.menu_layout.addWidget(self.node_types)
         self.menu_layout.addWidget(self.clear_board_button)
         self.menu_layout.addWidget(self.clear_vis_button)
@@ -124,12 +132,12 @@ class PathfindingVisualizer(QMainWindow):
             color = self.colors['Empty'] if self.board[x, y] == 0 else self.colors['Wall']
             self.__draw_visualization_node(x, y, color, border, brush)
             QApplication.processEvents()
-            time.sleep(0)
+            time.sleep(self.speed_levels[self.speed.currentText()])
     
 
     def __visualize(self):
-        self.algorithm_types = {'Dijkstra\'s Algorithm': algorithms.dijkstra_shortest_path, 
-                                'A* Search': algorithms.astar_shortest_path}
+        self.algorithm_types = {'Dijkstra\'s Algorithm': self.pf_algorithms.dijkstra_shortest_path, 
+                                'A* Search': self.pf_algorithms.astar_shortest_path}
 
         self.visualization_nodes = np.zeros((self.cols, self.rows))
         self.__reload_graphic_view()
@@ -152,7 +160,7 @@ class PathfindingVisualizer(QMainWindow):
                 self.visualization_nodes[x, y] = 4
                 self.__draw_visualization_node(x, y, self.colors['Visualization'], border, brush)
                 QApplication.processEvents()
-                time.sleep(0)
+                time.sleep(self.speed_levels[self.speed.currentText()])
 
         for node in path:
             x, y = np.unravel_index(node, self.board.shape)
@@ -357,7 +365,6 @@ if __name__ == '__main__':
     app = QApplication()
     view = PathfindingVisualizer(41, 51)
     view.show()
-    app.setStyle('Fusion')
     app.exec()
 
 

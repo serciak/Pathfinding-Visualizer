@@ -44,6 +44,9 @@ class MenuView(QMainWindow):
         self.board_options.setItemIcon(2, QIcon('./icons/large_icon.png'))
         self.board_options.setIconSize(QSize(30, 30))
         self.board_options.setCurrentIndex(1)
+        self.board_options.setEditable(True)
+        self.board_options.lineEdit().setAlignment(Qt.AlignCenter)
+        self.board_options.lineEdit().setReadOnly(True)
 
         quit_button = QPushButton('Quit')
         quit_button.setFont(font)
@@ -53,6 +56,8 @@ class MenuView(QMainWindow):
         buttons_layout.addWidget(start_button, alignment=Qt.AlignCenter)
         buttons_layout.addWidget(self.board_options, alignment=Qt.AlignCenter)
         buttons_layout.addWidget(quit_button, alignment=Qt.AlignCenter)
+
+        buttons_layout.setContentsMargins(0, 50, 0, 80)
 
 
         self.central_layout.addLayout(buttons_layout)
@@ -66,7 +71,6 @@ class MenuView(QMainWindow):
         self.pfv_view.show()
         self.hide()
         
-
 
 
 if __name__ == '__main__':
