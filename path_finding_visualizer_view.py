@@ -32,7 +32,7 @@ class PathfindingVisualizer(QMainWindow):
                        'Visualization': QColor(66, 133, 244, 255),
                        'Path': QColor(251, 188, 5, 255),
                        'Empty': Qt.white}
-        self.speed_levels = {'Extreme fast': 0, 'Fast': 0.01, 'Average': 0.025, 'Slow': 0.075}
+        self.speed_levels = {'Fast': 0, 'Average': 0.001, 'Slow': 0.0025}
 
         self.maze_generator = MazeGenerator(self.board.shape)
         self.pf_algorithms = PathfindingAlgorithms()
