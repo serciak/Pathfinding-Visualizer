@@ -115,7 +115,7 @@ class PathfindingVisualizer(QMainWindow):
         self.__reload_graphic_view()
 
         try:
-            visited, path = algorithms.dijkstra_shortest_path(self.board, self.start_point, self.end_point)
+            visited, path = algorithms.astar_shortest_path(self.board, self.start_point, self.end_point)
         except Exception as e:
             self.__display_warning('Visualization error', str(e))
             return
