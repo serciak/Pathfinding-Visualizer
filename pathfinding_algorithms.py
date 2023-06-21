@@ -132,18 +132,22 @@ class PathfindingAlgorithms:
     def dfs_shortest_path(self, board, start, end):
         if start is None or end is None:
             raise ValueError("Start or end point not found!")
-        
+
         rows, cols = board.shape
 
-        visited = set()
+        visited = []
         path = []
 
-        def dfs(node):
-            if node == end:
-                return True
+        stack = [(start, [start])]
+        while stack:
+            node, current_path = stack.pop()
 
-            visited.add(node)
-            path.append(node)
+            if node == end:
+                path = current_path
+                break
+            
+            if node != 1:
+                visited.append(node)
 
             neighbors = [(node[0] - 1, node[1]), (node[0] + 1, node[1]),
                         (node[0], node[1] - 1), (node[0], node[1] + 1)]
@@ -152,15 +156,11 @@ class PathfindingAlgorithms:
                 neighbor_row, neighbor_col = neighbor
                 if 0 <= neighbor_row < rows and 0 <= neighbor_col < cols:
                     if neighbor not in visited and board[neighbor_row, neighbor_col] != 1:
-                        if dfs(neighbor):
-                            return True
+                        stack.append((neighbor, current_path + [neighbor]))
 
-            path.remove(node)
-            return False
-
-        if dfs(start):
+        if path:
             # Shortest path found
-            visited = list(visited)
+            #visited = visited
             path = [np.ravel_multi_index(node, dims=(rows, cols)) for node in path]
             return visited, path
 
