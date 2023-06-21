@@ -4,7 +4,13 @@ import json
 
 class BoardSaver:
     def __init__(self, board_size):
-        self.boards_path = f'./saved_boards/{board_size}'
+        self.boards_path = f'./saved_boards/{board_size.lower()}'
+        self.__make_boards_path_dirs()
+
+
+    def __make_boards_path_dirs(self):
+        if not os.path.exists(self.boards_path):
+            os.makedirs(self.boards_path)
 
 
     def get_boards_names(self, size):
@@ -19,6 +25,8 @@ class BoardSaver:
 
     def save_board(self, name, board):
         board_path = os.path.join(self.boards_path, name + '.json')
+
+        board[board > 1] = 0
 
         with open(board_path, 'w') as file:
             json.dump(board.tolist(), file)

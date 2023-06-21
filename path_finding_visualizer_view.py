@@ -1,13 +1,15 @@
 from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QHBoxLayout, QVBoxLayout, QLabel,
                                QLineEdit, QPushButton, QMessageBox, QGraphicsView, QGraphicsScene, QComboBox)
-from PySide6.QtCore import Qt, QEvent, QRectF, QSize, Signal
-from PySide6.QtGui import QPen, QBrush, QIcon, QColor, QPixmap
+from PySide6.QtCore import Qt, QEvent, QRectF, QSize, Signal, QRegularExpression
+from PySide6.QtGui import QPen, QBrush, QIcon, QColor, QPixmap, QRegularExpressionValidator
 import numpy as np
 from pathfinding_algorithms import PathfindingAlgorithms
 from maze_generator import MazeGenerator
 from board_saving import BoardSaver
+from board_saving_window import BoardSavingWindow
 import time
 import math
+import re
 
 
 
@@ -89,6 +91,10 @@ class PathfindingVisualizer(QMainWindow):
         self.maze_button.setMinimumSize(120, 50)
         self.maze_button.setIconSize(QSize(30, 30))
 
+        save_button = QPushButton(icon=QIcon('./icons/save_icon.png'), text='Save board')
+        save_button.setMinimumSize(120, 50)
+        save_button.setIconSize(QSize(30, 30))
+
         self.back_button = QPushButton(icon=QIcon('./icons/back_icon.png'))
         self.back_button.setMinimumSize(120, 50)
         self.back_button.setIconSize(QSize(30, 30))
@@ -98,6 +104,7 @@ class PathfindingVisualizer(QMainWindow):
         self.clear_vis_button.clicked.connect(self.__clear_visualization)
         self.clear_board_button.clicked.connect(self.__clear_board)
         self.back_button.clicked.connect(self.__on_back_button)
+        save_button.clicked.connect(self.__display_board_saving_window)
 
         self.menu_layout.addWidget(self.algorithms_list)
         self.menu_layout.addWidget(self.start_button)
@@ -106,6 +113,7 @@ class PathfindingVisualizer(QMainWindow):
         self.menu_layout.addWidget(self.clear_board_button)
         self.menu_layout.addWidget(self.clear_vis_button)
         self.menu_layout.addWidget(self.maze_button)
+        self.menu_layout.addWidget(save_button)
         self.menu_layout.addWidget(self.back_button)
 
         self.menu_widget.setLayout(self.menu_layout)
@@ -362,8 +370,18 @@ class PathfindingVisualizer(QMainWindow):
         warn_box.exec()
 
 
-    def __display_board_saving_dialog(self):
-        pass
+    def __display_board_saving_window(self):
+        self.board_saving_window = BoardSavingWindow()
+
+        self.board_saving_window.save_clicked.connect(self.__on_save_button)
+
+        self.board_saving_window.show()
+
+
+    def __on_save_button(self):
+        name = self.board_saving_window.name_input.text()
+        self.board_saver.save_board(name, self.board)
+        self.board_saving_window.close()
 
 
 

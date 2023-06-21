@@ -44,9 +44,9 @@ class MenuView(QMainWindow):
         self.board_options.setItemIcon(2, QIcon('./icons/large_icon.png'))
         self.board_options.setIconSize(QSize(30, 30))
         self.board_options.setCurrentIndex(1)
-        self.board_options.setEditable(True)
-        self.board_options.lineEdit().setAlignment(Qt.AlignCenter)
-        self.board_options.lineEdit().setReadOnly(True)
+        #self.board_options.setEditable(True)
+        #self.board_options.lineEdit().setAlignment(Qt.AlignCenter)
+        #self.board_options.lineEdit().setReadOnly(True)
 
         quit_button = QPushButton('Quit')
         quit_button.setFont(font)
