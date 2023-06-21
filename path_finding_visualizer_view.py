@@ -62,7 +62,7 @@ class PathfindingVisualizer(QMainWindow):
 
         self.algorithms_list = QComboBox()
         self.algorithms_list.setMinimumSize(120, 50)
-        self.algorithms_list.addItems(['Dijkstra\'s Algorithm', 'A* Search'])
+        self.algorithms_list.addItems(['Dijkstra\'s Algorithm', 'A* Search', 'Depth-First Search'])
         self.algorithms_list.setToolTip('Choose algorithm to visualize')
 
         self.speed = QComboBox()
@@ -179,7 +179,8 @@ class PathfindingVisualizer(QMainWindow):
 
     def __visualize(self):
         self.algorithm_types = {'Dijkstra\'s Algorithm': self.pf_algorithms.dijkstra_shortest_path, 
-                                'A* Search': self.pf_algorithms.astar_shortest_path}
+                                'A* Search': self.pf_algorithms.astar_shortest_path,
+                                'Depth-First Search': self.pf_algorithms.dfs_shortest_path}
 
         self.visualization_nodes = np.zeros((self.cols, self.rows))
         self.__reload_graphic_view()
