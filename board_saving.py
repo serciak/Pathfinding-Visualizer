@@ -13,7 +13,7 @@ class BoardSaver:
             os.makedirs(self.boards_path)
 
 
-    def get_boards_names(self, size):
+    def get_boards_names(self):
         boards_names = []
 
         for filename in os.listdir(self.boards_path):

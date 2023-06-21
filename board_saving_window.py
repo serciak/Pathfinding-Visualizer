@@ -4,7 +4,6 @@ from PySide6.QtCore import Qt, Signal, QRegularExpression
 
 
 class BoardSavingWindow(QWidget):
-    closed = Signal()
     save_clicked = Signal()
 
     def __init__(self):
@@ -31,10 +30,6 @@ class BoardSavingWindow(QWidget):
 
         self.name_input.textChanged.connect(self.__on_text_change)
         self.save_button.clicked.connect(self.__on_save_button)
-
-
-    def closeEvent(self):
-        self.closed.emit()
 
 
     def __on_text_change(self):

@@ -1,7 +1,7 @@
-from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QHBoxLayout, QVBoxLayout, QLabel,
-                               QLineEdit, QPushButton, QMessageBox, QGraphicsView, QGraphicsScene, QComboBox)
-from PySide6.QtCore import Qt, QEvent, QRectF, QSize, Signal, QRegularExpression
-from PySide6.QtGui import QPen, QBrush, QIcon, QColor, QPixmap, QRegularExpressionValidator
+from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QHBoxLayout, QVBoxLayout, QLineEdit, 
+                               QPushButton, QMessageBox, QGraphicsView, QGraphicsScene, QComboBox)
+from PySide6.QtCore import Qt, QEvent, QRectF, QSize, Signal
+from PySide6.QtGui import QPen, QBrush, QIcon, QColor, QPixmap
 import numpy as np
 from pathfinding_algorithms import PathfindingAlgorithms
 from maze_generator import MazeGenerator
@@ -9,7 +9,6 @@ from board_saving import BoardSaver
 from board_saving_window import BoardSavingWindow
 import time
 import math
-import re
 
 
 
@@ -59,15 +58,18 @@ class PathfindingVisualizer(QMainWindow):
         self.start_button = QPushButton(icon=QIcon('./icons/start_icon.png'))
         self.start_button.setMinimumSize(120, 50)
         self.start_button.setIconSize(QSize(30, 30))
+        self.start_button.setToolTip('Start visualization')
 
         self.algorithms_list = QComboBox()
         self.algorithms_list.setMinimumSize(120, 50)
         self.algorithms_list.addItems(['Dijkstra\'s Algorithm', 'A* Search'])
+        self.algorithms_list.setToolTip('Choose algorithm to visualize')
 
         self.speed = QComboBox()
         self.speed.setMinimumSize(120, 50)
         self.speed.addItems(self.speed_levels.keys())
         self.speed.setCurrentIndex(0)
+        self.speed.setToolTip('Choose speed of visualization')
 
         self.node_types = QComboBox()
         self.node_types.setMinimumSize(120, 50)
@@ -77,6 +79,7 @@ class PathfindingVisualizer(QMainWindow):
         self.node_types.setItemIcon(1, QIcon('./icons/finish_icon.png'))
         self.node_types.setItemIcon(2, QIcon('./icons/wall_icon.png'))
         self.node_types.setIconSize(QSize(20,20))
+        self.node_types.setToolTip('Choose node to draw')
 
 
         self.clear_board_button = QPushButton(icon=QIcon('./icons/bin_icon.png'), text='Clear board')
@@ -90,14 +93,33 @@ class PathfindingVisualizer(QMainWindow):
         self.maze_button = QPushButton(icon=QIcon('./icons/maze_icon.png'))
         self.maze_button.setMinimumSize(120, 50)
         self.maze_button.setIconSize(QSize(30, 30))
+        self.maze_button.setToolTip('Generate maze')
 
-        save_button = QPushButton(icon=QIcon('./icons/save_icon.png'), text='Save board')
+        load_layout = QHBoxLayout()
+
+        self.saved_boards = QComboBox()
+        self.saved_boards.setMinimumSize(50, 50)
+        self.__update_saved_boards_list()
+        self.saved_boards.setCurrentIndex(0)
+        self.saved_boards.setToolTip('Choose board to load')
+
+        load_button = QPushButton(icon=QIcon('./icons/load_icon.png'))
+        load_button.setMinimumSize(50, 50)
+        load_button.setIconSize(QSize(30, 30))
+        load_button.setToolTip('Load board')
+
+        load_layout.addWidget(load_button)
+        load_layout.addWidget(self.saved_boards)
+
+        save_button = QPushButton(icon=QIcon('./icons/save_icon.png'))
         save_button.setMinimumSize(120, 50)
         save_button.setIconSize(QSize(30, 30))
+        save_button.setToolTip('Save current board')
 
         self.back_button = QPushButton(icon=QIcon('./icons/back_icon.png'))
         self.back_button.setMinimumSize(120, 50)
         self.back_button.setIconSize(QSize(30, 30))
+        self.back_button.setToolTip('Go back to menu')
 
         self.start_button.clicked.connect(self.__visualize)
         self.maze_button.clicked.connect(self.__generate_maze)
@@ -105,6 +127,7 @@ class PathfindingVisualizer(QMainWindow):
         self.clear_board_button.clicked.connect(self.__clear_board)
         self.back_button.clicked.connect(self.__on_back_button)
         save_button.clicked.connect(self.__display_board_saving_window)
+        load_button.clicked.connect(self.__on_load_button)
 
         self.menu_layout.addWidget(self.algorithms_list)
         self.menu_layout.addWidget(self.start_button)
@@ -114,6 +137,7 @@ class PathfindingVisualizer(QMainWindow):
         self.menu_layout.addWidget(self.clear_vis_button)
         self.menu_layout.addWidget(self.maze_button)
         self.menu_layout.addWidget(save_button)
+        self.menu_layout.addLayout(load_layout)
         self.menu_layout.addWidget(self.back_button)
 
         self.menu_widget.setLayout(self.menu_layout)
@@ -121,6 +145,14 @@ class PathfindingVisualizer(QMainWindow):
 
         return self.menu_widget
     
+
+    def __update_saved_boards_list(self):
+        self.saved_boards.clear()
+
+        boards_list = ['']
+        boards_list.extend(self.board_saver.get_boards_names())
+        self.saved_boards.addItems(boards_list)
+
 
     def __on_back_button(self):
         self.close()
@@ -382,13 +414,17 @@ class PathfindingVisualizer(QMainWindow):
         name = self.board_saving_window.name_input.text()
         self.board_saver.save_board(name, self.board)
         self.board_saving_window.close()
+        self.__update_saved_boards_list()
+        self.__reload_graphic_view()
 
 
+    def __on_load_button(self):
+        name = self.saved_boards.currentText()
 
-if __name__ == '__main__':
-    app = QApplication()
-    view = PathfindingVisualizer(41, 51)
-    view.show()
-    app.exec()
-
-
+        if name == '':
+            self.__display_warning('Load error', 'Board to load wasn\'t choosen!')
+            return
+        
+        self.__clear_board()
+        self.board = self.board_saver.load_board(name)
+        self.__reload_graphic_view()
